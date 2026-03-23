@@ -9,9 +9,14 @@ description: "强大的AI Coding Agent，可满足任何软件设计、开发、
 
 Claude Code作为一款具备超强能力的Coding Agent，既可以完成小单元的代码编写，也可以进行大模块的整体开发、测试和验证。在有Coding Agents助力的情况下，你不必亲自完成代码的撰写、问题修复和测试验证，你只需将任务需求转换为明确、完整的指令，并交由Claude Code完全自主地完成代码的撰写、问题修复和测试验证。Claude Code不仅是执行者，你在遇到需求分解、设计相关的问题时，甚至可以向Claude Code需求建议或进行讨论，在它的帮助下完成整个开发工作。
 
-本技能用于以python脚本的方式调用Claude Code。
+本技能用于以命令行的方式调用Claude Code。
 
 ## 快速开始
+
+### 安装依赖
+```bash
+npm install -g @anthropic-ai/claude-agent-sdk
+```
 
 ### 基本用法
 

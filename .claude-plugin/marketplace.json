@@ -1,0 +1,13 @@
+{
+    "name": "agents-addons",
+    "owner": {
+      "name": "zzb"
+    },
+    "plugins": [
+      {
+        "name": "dev-team",
+        "source": "./plugins/dev-team",
+        "description": "Adds a /dev-team skill for dev team work"
+      }
+    ]
+  }
