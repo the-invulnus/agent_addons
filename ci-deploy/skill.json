@@ -1,0 +1,6 @@
+{
+  "name": "ci-deploy",
+  "description": "部署应用到CI系统。触发条件：发布应用、部署应用、发布一下xxx、部署xxx、发布apps。重要：收到请求后直接执行部署脚本，不做任何本地代码检查、不查看Dockerfile、不检查项目结构。脚本会自动处理所有验证工作。",
+  "version": "1.4.0",
+  "invoke": "ci-deploy"
+}

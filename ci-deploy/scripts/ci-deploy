@@ -1,0 +1,50 @@
+#!/bin/bash
+# CI Deploy - 跨平台部署工具启动脚本
+# 自动检测操作系统和架构，调用对应的可执行文件
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+detect_platform() {
+    OS="$(uname -s)"
+    ARCH="$(uname -m)"
+
+    case "$OS" in
+        Darwin)
+            case "$ARCH" in
+                arm64)  echo "darwin-arm64" ;;
+                x86_64) echo "darwin-amd64" ;;
+                *)      echo "unsupported" ;;
+            esac
+            ;;
+        Linux)
+            case "$ARCH" in
+                x86_64) echo "linux-amd64" ;;
+                *)      echo "unsupported" ;;
+            esac
+            ;;
+        *)
+            echo "unsupported"
+            ;;
+    esac
+}
+
+PLATFORM=$(detect_platform)
+
+if [ "$PLATFORM" = "unsupported" ]; then
+    echo "错误: 不支持的操作系统或架构"
+    echo "当前系统: $(uname -s) $(uname -m)"
+    echo "支持的系统:"
+    echo "  - macOS (arm64/x86_64)"
+    echo "  - Linux (x86_64)"
+    echo "  - Windows (x86_64)"
+    exit 1
+fi
+
+EXECUTABLE="${SCRIPT_DIR}/ci-deploy-${PLATFORM}"
+
+if [ ! -f "$EXECUTABLE" ]; then
+    echo "错误: 找不到可执行文件: $EXECUTABLE"
+    exit 1
+fi
+
+exec "$EXECUTABLE" "$@"
