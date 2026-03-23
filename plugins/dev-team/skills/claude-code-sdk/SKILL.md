@@ -9,7 +9,7 @@ description: "强大的AI Coding Agent，可满足任何软件设计、开发、
 
 Claude Code作为一款具备超强能力的Coding Agent，既可以完成小单元的代码编写，也可以进行大模块的整体开发、测试和验证。在有Coding Agents助力的情况下，你不必亲自完成代码的撰写、问题修复和测试验证，你只需将任务需求转换为明确、完整的指令，并交由Claude Code完全自主地完成代码的撰写、问题修复和测试验证。Claude Code不仅是执行者，你在遇到需求分解、设计相关的问题时，甚至可以向Claude Code需求建议或进行讨论，在它的帮助下完成整个开发工作。
 
-本技能用于以命令行的方式调用Claude Code。
+本技能用于以node脚本的方式调用Claude Code。
 
 ## 快速开始
 
@@ -20,16 +20,16 @@ npm install -g @anthropic-ai/claude-agent-sdk
 
 ### 基本用法
 
-调用位于本技能目录下的`scripts/run_claude`脚本来调用Claude Code。
+调用位于本技能目录下的`scripts/run_claude.mjs`脚本来调用Claude Code。
 
 ```bash
-/path/to/skills/claude-code-sdk/scripts/run_claude --query "Find and fix the bug in auth.py"
+node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs --query "Find and fix the bug in auth.py"
 ```
 
 ## 命令行选项
 
 ```
-/path/to/skills/claude-code-sdk/scripts/run_claude --query QUERY [--append-system-prompt APPEND_SYSTEM_PROMPT] [--resume RESUME] [--log-file LOG_FILE]
+node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs --query QUERY [--append-system-prompt APPEND_SYSTEM_PROMPT] [--resume RESUME] [--log-file LOG_FILE]
 ```
 
 | 选项                     | 描述                         |
@@ -45,19 +45,19 @@ npm install -g @anthropic-ai/claude-agent-sdk
 使用 `--append-system-prompt` 添加指令，同时保留 Claude Code 默认行为：
 
 ```bash
-/path/to/skills/claude-code-sdk/scripts/run_claude --query "Find and fix the bug in auth.py" --append-system-prompt "You are a security engineer. Review for vulnerabilities."
+node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs --query "Find and fix the bug in auth.py" --append-system-prompt "You are a security engineer. Review for vulnerabilities."
 ```
 
 
 ### 2. 继续会话
 
-在使用Claude Code完成连续任务时，需要使用 `--resume` 参数来继续会话，是的Claude Code能够保留之前的上下文信息。在`run_claude.py`脚本的输出中，会记录当前会话ID，并将其作为结果的一部分返回。当你需要继续会话时，只需将该会话ID作为`--resume`参数的值即可。
+在使用Claude Code完成连续任务时，需要使用 `--resume` 参数来继续会话，是的Claude Code能够保留之前的上下文信息。在`run_claude.mjs`脚本的输出中，会记录当前会话ID，并将其作为结果的一部分返回。当你需要继续会话时，只需将该会话ID作为`--resume`参数的值即可。
 
 **注意**：除非你必须要开始一个全新的开发项目，否则都要使用--continue参数，让Claude Code在连续的工作模式下处理你的开发调试任务。
 
 ### 3. 记录中间输出
 
-当使用Claude Code执行复杂任务时，`run_claude.py`脚本会运行较长时间，为了方便观察中间执行过程，可以使用`--log-file`参数来将记录中间输出结果写入到文件中，在等待脚本执行完成期间，你可以通过读取文件内容来实时查看中间输出结果。
+当使用Claude Code执行复杂任务时，`run_claude.mjs`脚本会运行较长时间，为了方便观察中间执行过程，可以使用`--log-file`参数来将记录中间输出结果写入到文件中，在等待脚本执行完成期间，你可以通过读取文件内容来实时查看中间输出结果。
 
 ## 注意事项
 
