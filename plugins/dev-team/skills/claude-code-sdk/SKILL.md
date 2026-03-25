@@ -51,9 +51,9 @@ node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs --query "Find and fi
 
 ### 2. 继续会话
 
-在使用Claude Code完成连续任务时，需要使用 `--resume` 参数来继续会话，是的Claude Code能够保留之前的上下文信息。在`run_claude.mjs`脚本的输出中，会记录当前会话ID，并将其作为结果的一部分返回。当你需要继续会话时，只需将该会话ID作为`--resume`参数的值即可。
+在使用Claude Code完成连续任务时，需要使用 `--resume` 参数指定会话ID来继续会话，使得Claude Code能够保留之前的上下文信息。在`run_claude.mjs`脚本的输出中，会记录当前会话ID，并将其作为结果的一部分返回。当你需要继续会话时，只需将该会话ID作为`--resume`参数的值即可。
 
-**注意**：除非你必须要开始一个全新的开发项目，否则都要使用--continue参数，让Claude Code在连续的工作模式下处理你的开发调试任务。
+**注意**：除非你必须要开始一个全新的开发项目，否则都要使用--resume参数，让Claude Code在连续的上下文中进行工作，以更好地处理你的任务。
 
 ### 3. 记录中间输出
 
