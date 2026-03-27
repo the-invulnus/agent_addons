@@ -22,22 +22,27 @@ npm install -g @anthropic-ai/claude-agent-sdk
 
 调用位于本技能目录下的`scripts/run_claude.mjs`脚本来调用Claude Code。
 
+`--cwd` 为必填项，且**必须是绝对路径**，表示 Claude Code 执行任务时的工作目录。
+
 ```bash
-node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs --query "Find and fix the bug in auth.py"
+node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs \
+  --query "Find and fix the bug in auth.py" \
+  --cwd /absolute/path/to/your/project
 ```
 
 ## 命令行选项
 
 ```
-node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs --query QUERY [--append-system-prompt APPEND_SYSTEM_PROMPT] [--resume RESUME] [--log-file LOG_FILE]
+node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs --query QUERY --cwd CWD [--log-file LOG_FILE] [--resume RESUME] [--append-system-prompt APPEND_SYSTEM_PROMPT]
 ```
 
-| 选项                     | 描述                         |
-| :----------------------- | :--------------------------- |
-| `--query`                | 要发送给Claude Code的查询    |
-| `--append-system-prompt` | 可选，要添加到系统提示的指令 |
-| `--resume`               | 可选，要继续的会话ID         |
-| `--log-file`             | 可选，要记录中间输出的文件   |
+| 选项                     | 描述                                                                 |
+| :----------------------- | :------------------------------------------------------------------- |
+| `--query`                | 必填，要发送给 Claude Code 的任务指令                                    |
+| `--cwd`                  | 必填，工作目录，**须为绝对路径**                                     |
+| `--log-file`             | 可选，将助手文本输出写入该文件（便于观察长任务中间结果）             |
+| `--resume`               | 可选，要继续的会话 ID                                                |
+| `--append-system-prompt` | 可选，追加到系统提示的指令                                           |
 
 
 ### 1. 自定义系统提示
@@ -45,7 +50,10 @@ node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs --query QUERY [--app
 使用 `--append-system-prompt` 添加指令，同时保留 Claude Code 默认行为：
 
 ```bash
-node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs --query "Find and fix the bug in auth.py" --append-system-prompt "You are a security engineer. Review for vulnerabilities."
+node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs \
+  --query "Find and fix the bug in auth.py" \
+  --cwd /absolute/path/to/your/project \
+  --append-system-prompt "You are a security engineer. Review for vulnerabilities."
 ```
 
 
@@ -55,9 +63,23 @@ node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs --query "Find and fi
 
 **注意**：除非你必须要开始一个全新的开发项目，否则都要使用--resume参数，让Claude Code在连续的上下文中进行工作，以更好地处理你的任务。
 
+```bash
+node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs \
+  --query "Continue: add unit tests for the parser" \
+  --cwd /absolute/path/to/your/project \
+  --resume "<session-id-from-previous-run>"
+```
+
 ### 3. 记录中间输出
 
-当使用Claude Code执行复杂任务时，`run_claude.mjs`脚本会运行较长时间，为了方便观察中间执行过程，可以使用`--log-file`参数来将记录中间输出结果写入到文件中，在等待脚本执行完成期间，你可以通过读取文件内容来实时查看中间输出结果。
+当使用Claude Code执行复杂任务时，`run_claude.mjs`脚本会运行较长时间，为了在运行过程中方便观察中间执行过程，可以使用`--log-file`参数来将记录中间输出结果写入到文件中，在等待脚本执行完成期间，你可以通过读取文件内容来实时查看中间输出结果。
+
+```bash
+node /path/to/skills/claude-code-sdk/scripts/run_claude.mjs \
+  --query "Refactor the API layer" \
+  --cwd /absolute/path/to/your/project \
+  --log-file /path/to/claude_run.log
+```
 
 ## 注意事项
 

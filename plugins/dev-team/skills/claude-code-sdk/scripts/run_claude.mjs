@@ -2,8 +2,8 @@
 
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { appendFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { appendFile, mkdir, writeFile } from "node:fs/promises";
+import { isAbsolute, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
@@ -20,21 +20,29 @@ if (!existsSync(sdkPath)) {
 const { query } = await import(pathToFileURL(sdkPath).href);
 
 /** @param {object} msg */
-async function appendAssistantTextToLog(msg, logFile) {
+async function getContentFromMessage(msg) {
   const content = msg.message?.content;
   if (!Array.isArray(content)) return;
+  let result = "";
+  const stamp = () => {
+    const d = new Date();
+    const h = String(d.getHours()).padStart(2, "0");
+    const m = String(d.getMinutes()).padStart(2, "0");
+    const s = String(d.getSeconds()).padStart(2, "0");
+    return `[${h}:${m}:${s}] `;
+  };
   for (const block of content) {
-    if (
-      block &&
-      typeof block === "object" &&
-      "type" in block &&
-      block.type === "text" &&
-      "text" in block &&
-      typeof block.text === "string"
-    ) {
-      await appendFile(logFile, block.text + "\n\n");
+    if (block && typeof block === "object" && "type" in block && block.type === "text" && "text" in block && typeof block.text === "string") {
+      result += stamp() + block.text + "\n";
+    }
+    else if (block && typeof block === "object" && "type" in block && block.type === "tool_use" && "name" in block) {
+      result += stamp() + "Calling Tool: " + block.name + "\n";
+    }
+    else {
+      console.log("unknown block type: " + JSON.stringify(block) + "\n");
     }
   }
+  return result;
 }
 
 async function main() {
@@ -54,28 +62,41 @@ async function main() {
     }));
   } catch {
     console.error(
-      "Usage: run_claude --query QUERY [--cwd CWD] [--resume RESUME] [--log-file PATH] [--append-system-prompt TEXT]",
+      "Usage: run_claude --query QUERY --cwd CWD [--log-file PATH] [--resume RESUME] [--append-system-prompt TEXT]",
     );
     process.exit(2);
   }
 
-  const prompt = values.query;
+  const cwd = values.cwd;
+  if (!cwd) {
+    console.error("error: the following arguments are required: --cwd");
+    process.exit(2);
+  }
+  if (!isAbsolute(cwd)) {
+    console.error("error: --cwd must be an absolute path");
+    process.exit(2);
+  }
+
+  const prompt = values.query + "\nMake sure to work in directory: " + cwd;
   if (!prompt) {
     console.error("error: the following arguments are required: --query");
     process.exit(2);
   }
 
-  const cwd = values.cwd;
-  const resume = values.resume;
+
   const logFile = values["log-file"];
+  const resume = values.resume;
   const appendSystemPrompt = values["append-system-prompt"];
 
   /** @type {string | undefined} */
   let res;
 
+  /** @type {string | null} */
+  let sessionDebugFile = null;
+
   try {
     const options = {
-      ...(cwd !== undefined ? { cwd } : {}),
+      // cwd,
       ...(appendSystemPrompt !== undefined
         ? { systemPrompt: appendSystemPrompt }
         : {}),
@@ -93,11 +114,35 @@ async function main() {
     };
 
     for await (const message of query({ prompt, options })) {
-      if (message.type === "system" && message.subtype === "init") {
-        if (logFile) {
+      // console.log(message);
+      if (message.type === "system") {
+        if (message.subtype === "init") {
           const sessionId = message.session_id;
-          await writeFile(logFile, `Session ID: ${sessionId}\n\n`);
+          if (sessionId) {
+            const dir = join("/tmp", ".claude");
+            await mkdir(dir, { recursive: true });
+            sessionDebugFile = join(dir, sessionId);
+            if (logFile) {
+              console.log("Start Session with ID: " + sessionId);
+              await writeFile(
+                logFile,
+                `Start Session with ID: ${sessionId}\n\n`,
+              );
+            }
+          }
         }
+        else if (message.subtype === "api_retry") {
+          console.log("Retry connecting to Claude API... " + message.attempt + "/" + message.max_retries);
+        }
+      }
+      if (sessionDebugFile) {
+        await appendFile(
+          sessionDebugFile,
+          JSON.stringify(message) + "\n",
+        );
+      }
+      if (message.type === "system" && message.subtype === "init") {
+        
       } else if (message.type === "result") {
         if (message.subtype === "success") {
           res =
@@ -111,8 +156,11 @@ async function main() {
             message.session_id;
         }
       } else if (message.type === "assistant") {
+        const content = await getContentFromMessage(message);
+        if (!content) continue;
+        console.log(content + "\n");
         if (!logFile) continue;
-        await appendAssistantTextToLog(message, logFile);
+        await appendFile(logFile, content + "\n\n");
       }
     }
     console.log(res === undefined ? "None" : res);
